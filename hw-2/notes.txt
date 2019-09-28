@@ -1,0 +1,62 @@
+Homework 2 Notes
+Manuel Serna-Aguilera
+
+
+
+Word Sense Disambiguation (WSD)
+* Given a word in context
+* A fixed inventory of potential word senses
+Goal: We want to decide which sense of the word our input word is.
+
+
+Aside:
+For this assignment our WSD task is a lexical sample task:
+- Select a very small pre-selected set of target words (e.g. line, plant)
+  - Store the senses for each of these words.
+
+
+Classification- use Naive Bayes
+* Input:
+    - word w and some features f
+    - fixed set of classes C={c1, c2, ..., cj}
+* Output: predicted class c that exists in C.
+
+
+* Implementation:
+    * step 0: Get a word pair (i.e. [night, seat]) and replace the first instance of
+either word with the pseudoword (i.e. nightseat for [night, seat]).
+    * step 0.5: Pre-process words in the amazon_reviews.txt file, save each line as a list.
+    * step 1: For each line, extract a window of +/- 10 words around the target word.
+
+        - 80% of the lines should be used for training.
+            - For training, create two files: night_training.txt & seat_training.txt
+
+        - 20% will be used for testing.
+            - For testing, create two files: night_testing.txt & seat_testing.txt
+            These will contain the contexts surrounding the words chosen.
+
+    * step 2: Create pseudowords. For each line in the review, replace ONLY the
+FIRST INSTANCE of either word, then move on to the next word.
+For each replacement, record the line # and original word in a truth file,
+this may end up not being necessary.
+
+    * step 3: Calculate the probabilities for each of the two senses for each pseudoword.
+Using the already-defined window size, calculate the frequencies of each word seen in the
+window around each psuedoword occurence. These words are the context features.
+
+    * step 4: Test time! Use the 20% of the contexts reserved for testing, to disambiguate 
+the pseudowords.
+
+----- Write the below steps in the report-----
+
+    * step 5: Evaluation Time! For each sense, determine whether the identified sense is 
+correct or not. You can do this in an excel spreadsheet most easily, 
+or in your own program, or by hand. 
+What was the accuracy of your disambiguation for each pseudoword?
+
+    * step 6: Analysis Time!
+      - How accurate is the algorithm on the words with distinct meanings 
+vs with the words that occur in similar contexts? 
+
+(Optional-Bonus) Do the same experiment using a contexts of different sizes and/or 
+more and less labeled dates. Is it more or less accurate?
