@@ -45,6 +45,16 @@ this may end up not being necessary.
 Using the already-defined window size, calculate the frequencies of each word seen in the
 window around each psuedoword occurence. These words are the context features.
 
+        * documents = [{"w1" : count1, "w2" : count2, ..., "sense" : "car", "tot_w_count" : count_for_document1}, {"w1" : count1, "w2" : count2, ..., "sense" : "bike", "tot_w_count" : count_for_document2}, ...]
+        
+        ^ "documents" will be a list of dictionaries of length d, where d=number of context windows for both "senses."
+        - In each dictionary:
+            - Count the number of times each unique word in the context window appears.
+                "word(i)" : count(i)
+            - Store sense (car or bike, etc.).
+                "sense" : sense(i)
+            - MAYBE: total word count as its own key-value pair.
+
     * step 4: Test time! Use the 20% of the contexts reserved for testing, to disambiguate 
 the pseudowords.
 
