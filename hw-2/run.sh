@@ -3,8 +3,8 @@
 set -u
 set -e
 
-python preprocess.py night seat
-python preprocess.py kitchen cough
-python preprocess.py car bike
+python wsd.py night seat
+python wsd.py kitchen cough
+python wsd.py car bike
 
 echo "Done."
