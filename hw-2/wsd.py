@@ -37,28 +37,49 @@ def wsd(word1, word2):
     windows        = {} # context windows for each "sense"
     windows[word1] = []
     windows[word2] = []
-    n_1            = 0 # total count of all words under "sense" 1
-    n_2            = 0 # total count of all words under "sense" 2
-    num_vocab      = 0 # number of unique words
-    uniquew        = {} # helps count unique words (for num_vocab)
+    
+    uniquewc        = {} # counts of unique words across all documents for each sense
+    uniquewc[word1] = {}
+    uniquewc[word2] = {}
+    
+    num_vocab = 0 # number of unique words
+    nv_helper = {} # helps count unique words (for num_vocab)
     
     '''
     Generate data
     '''
     for w in range(len(words)-1):
-        # Get context windows for each sense
+        # Get context windows and maintain uniquewc for each "sense"
         if words[w] == word1:
             c = words[w-r:w+r]
             c[10] = pseudoword
             windows[word1].append(c)
+            # Update uniquewc for sense 1
+            for i in c:
+                if i not in uniquewc[word1]:
+                    uniquewc[word1][i] = 1
+                else:
+                    uniquewc[word1][i] += 1
         if words[w] == word2:
             c = words[w-r:w+r]
             c[10] = pseudoword
             windows[word2].append(c)
-        # Increase num_vocab is word not encountered before
-        if words[w] not in uniquew:
-            uniquew[words[w]] = words[w]
+            # Update uniquewc for sense 2
+            for i in c:
+                if i not in uniquewc[word2]:
+                    uniquewc[word2][i] = 1
+                else:
+                    uniquewc[word2][i] += 1
+        # Maintain encountered words dict
+        if words[w] not in nv_helper:
+            nv_helper[words[w]] = 1
             num_vocab += 1
+    
+    # Calculate conditional probabilities of all words given either sense 1 or sense 2
+    # p = (xxx+1)/(+num_vocab)
+    
+    
+    
     
     #    #    #print(words[w])
     #    #    uniquew.append(words[w])
@@ -66,6 +87,8 @@ def wsd(word1, word2):
     #print(uniquew)
     #with open("uniquew.json", 'w') as file:
     #    file.write(json.dumps(uniquew, indent=4))
+    with open("uniquewc.json", 'w') as file:
+        file.write(json.dumps(uniquewc, indent=4))
     #print(num_vocab)
     '''
     For each word "sense", 
