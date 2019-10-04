@@ -1,15 +1,8 @@
 #************************************************
-'''
-SNLP Homework 2
-Manuel Serna-Aguilera
-
-Preprocess given corpus (before disambiguating word pairs).
-Read each line and extract a 10-word window around the first instance of a target word in a sentence.
-(Replace target words with pseudowords).
-
-80% of the lines will be used for training.
-20% of the lines will be used for testing.
-'''
+# SNLP Homework 2
+# Manuel Serna-Aguilera
+#
+# Disambiguate word sense given a pseudoword (two different words with two different meanings concatenated together)
 #************************************************
 
 import sys
@@ -17,177 +10,185 @@ import string
 import json
 
 #================================================
-# Disambiguate word senses using word pairs (word1, word2)
-# Return probabilities for each word "sense" for some pseudoword=word1+word2
+# Disambiguate word senses using a word pair (word1, word2)
+# Print probabilities for each word "sense" for some pseudoword=word1+word2
 #================================================
 def wsd(word1, word2):
     # Preprocess text--remove punctuation, html residue, and digits
-    file_name = 'amazon_reviews.txt'
-    text = open(file_name, 'r')
+    text = open('amazon_reviews.txt', 'r')
     raw_text = text.read()
     text.close()
     formatted_text = raw_text.lower().replace('&quot', '').translate(str.maketrans('', '', string.punctuation)).translate(str.maketrans('', '', string.digits))
     
-    '''
-    Variables
-    '''
-    words          = formatted_text.split() # all words from text file
-    pseudoword     = word1+word2 # pseudoword that could be any of two senses
-    r              = 10 # range r for all context windows
-    windows        = {} # context windows for each "sense"
+    
+    #--------------------------------------------
+    # Variables
+    #--------------------------------------------
+    # Adjustable range r for all context windows
+    r = 10
+    
+    words = formatted_text.split() # all words from text file, disregard after getting context windows
+    pseudoword = word1+word2 # pseudoword that could mean any of two senses
+    
+    # All context windows for each sense
+    windows = {}
     windows[word1] = []
     windows[word2] = []
     
-    uniquewc        = {} # counts of unique words across all documents for each sense
+    # Training data dict
+    trainw = {}
+    trainw[word1] = []
+    trainw[word2] = []
+    
+    
+    # Test context windows
+    testw = []
+    actual = {} # holds context windows with actual "sense", output to a file for easy verification by the user
+    
+    # Keep track of each unique word count (wc) across all documents for each sense (need these number to calculate probabilities)
+    uniquewc = {} # counts of unique words across all documents for each sense
     uniquewc[word1] = {}
     uniquewc[word2] = {}
     
-    num_vocab = 0 # number of unique words
+    # Probability-related
+    n1        = 0 # sum of frequencies for all words under sense 1
+    n2        = 0 # sum of frequencies for all words under sense 2
+    num_vocab = 0 # number of unique words (independent of documents and senses)
     nv_helper = {} # helps count unique words (for num_vocab)
     
-    '''
-    Generate data
-    '''
+    
+    #--------------------------------------------
+    # Extract context windows
+    #--------------------------------------------
     for w in range(len(words)-1):
-        # Get context windows and maintain uniquewc for each "sense"
         if words[w] == word1:
-            c = words[w-r:w+r]
-            c[10] = pseudoword
-            windows[word1].append(c)
-            # Update uniquewc for sense 1
-            for i in c:
-                if i not in uniquewc[word1]:
-                    uniquewc[word1][i] = 1
-                else:
-                    uniquewc[word1][i] += 1
+            c = words[w-r:w+r] # get context window c according to some range
+            original = c[10] # store original window to calculate accuracy
+            c[10] = pseudoword # replace "sense"
+            windows[word1].append(c) # store c in a dictionary
+            actual[' '.join(c)] = original # store context window with original window for manual verification
         if words[w] == word2:
             c = words[w-r:w+r]
+            original = c[10]
             c[10] = pseudoword
             windows[word2].append(c)
-            # Update uniquewc for sense 2
-            for i in c:
-                if i not in uniquewc[word2]:
-                    uniquewc[word2][i] = 1
-                else:
-                    uniquewc[word2][i] += 1
-        # Maintain encountered words dict
-        if words[w] not in nv_helper:
-            nv_helper[words[w]] = 1
-            num_vocab += 1
-    
-    # Calculate conditional probabilities of all words given either sense 1 or sense 2
-    # p = (xxx+1)/(+num_vocab)
+            actual[' '.join(c)] = original
     
     
+    #--------------------------------------------
+    # Extract training (80%) and testing (20%) data for both senses
+    #--------------------------------------------
+    size1 = len(windows[word1])
+    trainw[word1] = windows[word1][:int(size1*0.8)] # first 80% of windows
+    for l in windows[word1][int(size1*0.8):]: # last 20% of windows
+        testw.append(l)
+    
+    size2 = len(windows[word2])
+    trainw[word2] = windows[word2][:int(size2*0.8)]
+    for l in windows[word2][int(size2*0.8):]:
+        testw.append(l)
     
     
-    #    #    #print(words[w])
-    #    #    uniquew.append(words[w])
-    #    #print(words[w])
-    #print(uniquew)
-    #with open("uniquew.json", 'w') as file:
-    #    file.write(json.dumps(uniquew, indent=4))
-    with open("uniquewc.json", 'w') as file:
-        file.write(json.dumps(uniquewc, indent=4))
-    #print(num_vocab)
+    #--------------------------------------------
+    # Get data needed to calculate probabilities from training set
+    #--------------------------------------------
+    for s in trainw: # only 2 senses
+        for j in trainw[s]: # n
+            for i in j: # 21 elements in n lists
+                # Add word counts to either sense 1 or 2
+                if s == word1:
+                    if i not in uniquewc[word1]:
+                        uniquewc[word1][i] = 1
+                        n1 += 1
+                    else:
+                        uniquewc[word1][i] += 1
+                        n1 += 1
+                if s == word2:
+                    if i not in uniquewc[word2]:
+                        uniquewc[word2][i] = 1
+                        n2 += 1
+                    else:
+                        uniquewc[word2][i] += 1
+                        n2 += 1
+                # Maintain encountered words dict
+                if i not in nv_helper:
+                    nv_helper[i] = 1
+                    num_vocab += 1
+    
+    
+    #--------------------------------------------
     '''
-    For each word "sense", 
+    Calculate conditional probabilities of all words given either sense 1 or sense 2.
+    Store probabilities in dict pw.
+        - key: word
+        - value: P(w|sense)
     '''
-    #for w in 
+    #--------------------------------------------
+    pw = {}
+    pw[word1] = {}
+    pw[word2] = {}
     
-    '''
-    #Create dictionary to hold context windows for each word in the pair.
-    #Write to a file so we can check our work.
-    c_windows = {}
-    c_windows[word1] = []
-    c_windows[word2] = []
-    
-    #Dictionary that stores frequencies of each "sense" and pseudoword.
-    pseudoword = word1+word2
-    
-    senses = {}
-    senses[word1] = 0
-    senses[word2] = 0
-    senses[pseudoword] = 0
-
-    
-    #Generate list of documents "documents"
-    #    - Store each unique word with its count for each context window c of +/- 10 words. Sense is key.
-    #    Note: word sense will always be at index i=10.
-    
-    #Define num_vocab, counts number of unique words across all context windows.
-    
-    documents = []
-    num_vocab = 0
-    
-    for i in range(len(words)-1):
-        if words[i] == word1:
-            c = words[i-10:i+10]
-            
-            # Count unique words
-            d = {}
-            for i in range(len(c)):
-                if c[i] not in d:
-                    d[c[i]] = 1
-                else:
-                    d[c[i]] += 1
-            documents.append(d)
-            
-            # Create sentence string to later store in file
-            c = ' '.join(c)
-            c_windows[word1].append(c)
-            
-            # Add to counts
-            senses[word1] += 1
-            senses[pseudoword] += 1
+    # Sense 1
+    for w in uniquewc[word1]:
+        pw[word1][w] = (uniquewc[word1][w]+1)/(n1+num_vocab)
+        # If this word is exclusive to sense 1, still account for it in terms of sense 2
+        if w not in pw[word2]:
+            pw[word2][w] = (1)/(n2+num_vocab) # add zero in num
         
-        # Apply same logic to sense 2
-        if words[i] == word2:
-            c = words[i-10:i+10]
-            d = {}
-            for i in range(len(c)):
-                if c[i] not in d:
-                    d[c[i]] = 1
-                else:
-                    d[c[i]] += 1
-            documents.append(d)
-            c = ' '.join(c)
-            c_windows[word2].append(c)
-            senses[word2] += 1
-            senses[pseudoword] += 1
+    # Sense 2
+    for w in uniquewc[word2]:
+        pw[word2][w] = (uniquewc[word2][w]+1)/(n2+num_vocab)
+        if w not in pw[word1]:
+            pw[word1][w] = (1)/(n1+num_vocab)
     
     
-    #Generate probabilities dictionary "probs" on 80% of the 
-    #    - For each unique word, calculate probability of it appearing given one of the two sense. Sense is key, value is P(word(i) | sense).
+    #--------------------------------------------
+    # Calculate the probabilities of instances of the pseudoword being one word sense or the other
+    # Accuracy = correct/totw
+    #--------------------------------------------
+    totw = 0 # total test windows
+    correct = 0 # test windows where prediction was correct
+    predicted = {} # predicted word senses for each context window
     
-    probs = []
+    for window in testw:
+        # Reset probability variables for next test window
+        p1 = 1
+        p2 = 1
+        for word in window:
+            # If there is a probability for a word from the test set, then multiply the final prob variable by word's prob
+            if word in pw[word1]:
+                p1 *= pw[word1][word]
+                p2 *= pw[word2][word]
+            else:
+                p1 *= 1
+                p2 *= 1
+        
+        # Get most likely word sense one test window at a time
+        maxp=max(p1, p2)
+        predicted_sense = ''
+        if maxp == p1:
+            predicted_sense = word1
+        else:
+            predicted_sense = word2
+        if actual[' '.join(window)] == predicted_sense:
+            correct += 1
+        
+        # Store actual and predicted senses for user to check
+        result = "actual: {}, predicted: {}".format(actual[' '.join(window)], predicted_sense)
+        predicted[' '.join(window)] = result
+        totw += 1
     
-    '''
     
+    #--------------------------------------------
+    # Print accuracy and write out results to file
+    #--------------------------------------------
+    print('Accuracy ({}): {}%'.format(pseudoword, int(100*(correct/totw))))
     
-    #for sense in c_windows:
-    
-    #print(senses)
-    
-    #Calculate the probabilities for each unique word in the documents
-    
-    #P(word_k | sense) = (n_k + 1)/(total_count_in_class + distinct_words) 
-    #where
-    
-    #n_k                  := frequency of word across all documents under a certain sense
-    #total_count_in_class := total counts of tat unique word
-    #distinct_words       := number of all distinct words across all documents
-    
-    
-    
-    #with open("c_windows.json", 'w') as file:
-    #    file.write(json.dumps(c_windows, indent=4))
-    #with open("documents.json", 'w') as file:
-    #    file.write(json.dumps(documents, indent=4))
-    
-    with open("windows.json", 'w') as file:
-        file.write(json.dumps(windows, indent=4))
-    
+    with open("results-{}.json".format(pseudoword), 'w') as file:
+        file.write(json.dumps(predicted, indent=4))
 
+
+#================================================
 # Call method and take in words as arguments
+#================================================
 wsd(sys.argv[1], sys.argv[2])
