@@ -1,0 +1,8 @@
+Word disambiguation test results.
+
+Accuracy (nightseat): 84%
+Accuracy (kitchencough): 90%
+Accuracy (carbike): 95%
+Accuracy (manufacturerbike): 73%
+Accuracy (bigsmall): 57%
+Accuracy (hugeheavy): 61%

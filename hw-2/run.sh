@@ -3,18 +3,17 @@
 set -u
 set -e
 
+echo "Word disambiguation test results." >> test_results.txt
+echo "" >> test_results.txt
+
 # First set--easy
-echo "Easy set"
-python wsd.py night seat
-python wsd.py kitchen cough
-python wsd.py car bike
-echo ""
+python wsd.py night seat >> test_results.txt
+python wsd.py kitchen cough >> test_results.txt
+python wsd.py car bike >> test_results.txt
 
 # Second set--harder
-echo "Harder set"
-python wsd.py manufacturer bike
-python wsd.py big small
-python wsd.py huge heavy
-echo ""
+python wsd.py manufacturer bike  >> test_results.txt
+python wsd.py big small >> test_results.txt
+python wsd.py huge heavy >> test_results.txt
 
 echo "Done."

@@ -178,7 +178,6 @@ def wsd(word1, word2):
         predicted[' '.join(window)] = result
         totw += 1
     
-    
     #--------------------------------------------
     # Print accuracy and write out results to file
     #--------------------------------------------
