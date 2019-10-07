@@ -77,17 +77,21 @@ def wsd(word1, word2):
     
     #--------------------------------------------
     # Extract training (80%) and testing (20%) data for both senses
+    # Get number of documents as well
     #--------------------------------------------
     size1 = len(windows[word1])
     trainw[word1] = windows[word1][:int(size1*0.8)] # first 80% of windows
+    num_doc1 = len(trainw[word1]) # get number of documents for sense 1
     for l in windows[word1][int(size1*0.8):]: # last 20% of windows
         testw.append(l)
     
     size2 = len(windows[word2])
     trainw[word2] = windows[word2][:int(size2*0.8)]
+    num_doc2 = len(trainw[word2])
     for l in windows[word2][int(size2*0.8):]:
         testw.append(l)
     
+    tot_docs = num_doc1 + num_doc2 # ge total to calculate probability of either sense P(word(i))
     
     #--------------------------------------------
     # Get data needed to calculate probabilities from training set
@@ -151,9 +155,9 @@ def wsd(word1, word2):
     predicted = {} # predicted word senses for each context window
     
     for window in testw:
-        # Reset probability variables for next test window
-        p1 = 1
-        p2 = 1
+        # Reset probability variables for next test window, with P(word(i))
+        p1 = (num_doc1/tot_docs)
+        p2 = (num_doc2/tot_docs)
         for word in window:
             # If there is a probability for a word from the test set, then multiply the final prob variable by word's prob
             if word in pw[word1]:
