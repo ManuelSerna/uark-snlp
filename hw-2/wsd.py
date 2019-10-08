@@ -148,14 +148,12 @@ def wsd(word1, word2):
     
     #--------------------------------------------
     # Calculate the probabilities of instances of the pseudoword being one word sense or the other
-    # Accuracy = correct/totw
+    # Accuracy = correct/total
     #--------------------------------------------
-    totw = 0 # total test windows
-    
+    tot1 = 0 # total instances of sense 1 in test windows
     correct1 = 0 # correct predictions of sense 1
-    tot1 = 0 # correct predictions
-    correct2 = 0
     tot2 = 0
+    correct2 = 0
     
     #correct = 0 # test windows where prediction was correct
     predicted = {} # predicted word senses for each context window
@@ -165,7 +163,7 @@ def wsd(word1, word2):
         p1 = (num_doc1/tot_docs)
         p2 = (num_doc2/tot_docs)
         for word in window:
-            # If there is a probability for a word from the test set, then multiply the final prob variable by word's prob
+            # If there is a probability for a word from the test set, then multiply the final probability variable by word's probability
             if word in pw[word1]:
                 p1 *= pw[word1][word]
                 p2 *= pw[word2][word]
@@ -178,28 +176,25 @@ def wsd(word1, word2):
         predicted_sense = ''
         if maxp == p1:
             predicted_sense = word1
-            tot1 += 1
         else:
             predicted_sense = word2
+        # Keep track of correctly guesses and total instances of senses
+        actual_sense = actual[' '.join(window)]
+        # Maintain count of total instances of each sense
+        if actual_sense == word1:
+            tot1 += 1
+        else:
             tot2 += 1
-        # If prediction was correct, keep track of which sense was predicted to be right
-        if actual[' '.join(window)] == predicted_sense:
+        # Maintain count of correct guesses
+        if actual_sense == predicted_sense:
             if predicted_sense == word1:
                 correct1 += 1
             if predicted_sense == word2:
                 correct2 += 1
-            #correct += 1
         
         # Store actual and predicted senses for user to check
         result = "actual: {}, predicted: {}".format(actual[' '.join(window)], predicted_sense)
         predicted[' '.join(window)] = result
-        totw += 1
-    
-    # Make sure total is not zero (avoid divide by zero error)
-    if tot1 == 0:
-        tot1 = 1
-    if tot2 == 0:
-        tot2 = 1
     
     #--------------------------------------------
     # Print accuracy and write out results to file
@@ -207,7 +202,7 @@ def wsd(word1, word2):
     print(pseudoword)
     print('\t{}: {}/{} correct {}%'.format(word1, correct1, tot1, int(100*(correct1/tot1))))
     print('\t{}: {}/{} correct {}%'.format(word2, correct2, tot2, int(100*(correct2/tot2))))
-    print('\toverall: {}/{} correct {}%'.format(correct1+correct2, totw, int(100*((correct1+correct2)/(totw)))))
+    print('\toverall: {}/{} correct {}%'.format(correct1+correct2, tot1+tot2, int(100*((correct1+correct2)/(tot1+tot2)))))
     
     
     with open("results-{}.json".format(pseudoword), 'w') as file:

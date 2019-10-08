@@ -1,26 +1,26 @@
 Word disambiguation test results.
 
 nightseat
-	night: 97/122 correct 79%
-	seat: 33/35 correct 94%
+	night: 97/99 correct 97%
+	seat: 33/58 correct 56%
 	overall: 130/157 correct 82%
 kitchencough
-	kitchen: 16/20 correct 80%
-	cough: 0/1 correct 0%
+	kitchen: 16/16 correct 100%
+	cough: 0/4 correct 0%
 	overall: 16/20 correct 80%
 carbike
-	car: 595/623 correct 95%
-	bike: 0/1 correct 0%
+	car: 595/595 correct 100%
+	bike: 0/28 correct 0%
 	overall: 595/623 correct 95%
 manufacturerbike
-	manufacturer: 12/17 correct 70%
-	bike: 23/32 correct 71%
+	manufacturer: 12/21 correct 57%
+	bike: 23/28 correct 82%
 	overall: 35/49 correct 71%
 bigsmall
-	big: 235/418 correct 56%
-	small: 54/84 correct 64%
+	big: 235/265 correct 88%
+	small: 54/237 correct 22%
 	overall: 289/502 correct 57%
 hugeheavy
-	huge: 117/197 correct 59%
-	heavy: 15/22 correct 68%
+	huge: 117/124 correct 94%
+	heavy: 15/95 correct 15%
 	overall: 132/219 correct 60%

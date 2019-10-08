@@ -3,7 +3,7 @@
 set -u
 set -e
 
-echo "Word disambiguation test results." >> test_results.txt
+echo "Word disambiguation test results." > test_results.txt
 echo "" >> test_results.txt
 
 # First set--easy
