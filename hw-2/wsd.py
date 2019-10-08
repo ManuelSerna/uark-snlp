@@ -151,7 +151,13 @@ def wsd(word1, word2):
     # Accuracy = correct/totw
     #--------------------------------------------
     totw = 0 # total test windows
-    correct = 0 # test windows where prediction was correct
+    
+    correct1 = 0 # correct predictions of sense 1
+    tot1 = 0 # correct predictions
+    correct2 = 0
+    tot2 = 0
+    
+    #correct = 0 # test windows where prediction was correct
     predicted = {} # predicted word senses for each context window
     
     for window in testw:
@@ -172,20 +178,37 @@ def wsd(word1, word2):
         predicted_sense = ''
         if maxp == p1:
             predicted_sense = word1
+            tot1 += 1
         else:
             predicted_sense = word2
+            tot2 += 1
+        # If prediction was correct, keep track of which sense was predicted to be right
         if actual[' '.join(window)] == predicted_sense:
-            correct += 1
+            if predicted_sense == word1:
+                correct1 += 1
+            if predicted_sense == word2:
+                correct2 += 1
+            #correct += 1
         
         # Store actual and predicted senses for user to check
         result = "actual: {}, predicted: {}".format(actual[' '.join(window)], predicted_sense)
         predicted[' '.join(window)] = result
         totw += 1
     
+    # Make sure total is not zero (avoid divide by zero error)
+    if tot1 == 0:
+        tot1 = 1
+    if tot2 == 0:
+        tot2 = 1
+    
     #--------------------------------------------
     # Print accuracy and write out results to file
     #--------------------------------------------
-    print('Accuracy ({}): {}%'.format(pseudoword, int(100*(correct/totw))))
+    print(pseudoword)
+    print('\t{}: {}/{} correct {}%'.format(word1, correct1, tot1, int(100*(correct1/tot1))))
+    print('\t{}: {}/{} correct {}%'.format(word2, correct2, tot2, int(100*(correct2/tot2))))
+    print('\toverall: {}/{} correct {}%'.format(correct1+correct2, totw, int(100*((correct1+correct2)/(totw)))))
+    
     
     with open("results-{}.json".format(pseudoword), 'w') as file:
         file.write(json.dumps(predicted, indent=4))
