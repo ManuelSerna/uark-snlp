@@ -200,9 +200,11 @@ def wsd(word1, word2):
     # Print accuracy and write out results to file
     #--------------------------------------------
     print(pseudoword)
+    print('range = ', r)
     print('\t{}: {}/{} correct {}%'.format(word1, correct1, tot1, int(100*(correct1/tot1))))
     print('\t{}: {}/{} correct {}%'.format(word2, correct2, tot2, int(100*(correct2/tot2))))
     print('\toverall: {}/{} correct {}%'.format(correct1+correct2, tot1+tot2, int(100*((correct1+correct2)/(tot1+tot2)))))
+    print()
     
     
     with open("results-{}.json".format(pseudoword), 'w') as file:
