@@ -63,14 +63,14 @@ def wsd(word1, word2):
     for w in range(len(words)-1):
         if words[w] == word1:
             c = words[w-r:w+r] # get context window c according to some range
-            original = c[10] # store original window to calculate accuracy
-            c[10] = pseudoword # replace "sense"
+            original = c[r] # store original window to calculate accuracy
+            c[r] = pseudoword # replace "sense"
             windows[word1].append(c) # store c in a dictionary
             actual[' '.join(c)] = original # store context window with original window for manual verification
         if words[w] == word2:
             c = words[w-r:w+r]
-            original = c[10]
-            c[10] = pseudoword
+            original = c[r]
+            c[r] = pseudoword
             windows[word2].append(c)
             actual[' '.join(c)] = original
     
