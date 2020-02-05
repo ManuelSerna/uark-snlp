@@ -1,4 +1,5 @@
 # uark-snlp
+This repository contains my programming projects for my statistical natural language processing (SNLP) course (CSCE 5543) at the University of Arkansas in the of fall of 2019.
 
 ## Collocations
 This programming assignment processes a text file full of reviews to extract collocations. First, the `count_bigrams.py` program will remove any words that include: digits, special characters, stop words imported from a txt file, as well as a minimum count requirement to increase accuracy. Next, the program in `get_collocations.py` calculates the chi-square values for each token and the top 100 values should indicate the top 100 collocations.
